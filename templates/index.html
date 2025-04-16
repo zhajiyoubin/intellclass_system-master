@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/app icon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>智能排课系统</title>
+</head>
+
+<body>
+<!-- 登录界面 -->
+<div id="login-container">
+    <div class="login-logo">
+        <h1>智能排课系统</h1>
+    </div>
+    <form id="login-form">
+        <input type="text" id="username" placeholder="用户名" required>
+        <input type="password" id="password" placeholder="密码" required>
+        <button type="submit" class="login-button">登录</button>
+    </form>
+</div>
+
+<!-- 主内容区域 -->
+<div id="main-content">
+    <!-- 功能导航栏 -->
+    <nav id="navbar">
+        <div class="nav-container">
+            <ul>
+                <li><a href="#" data-target="help-manual" class="nav-link">帮助手册</a></li>
+                <li><a href="#" data-target="timetable-creation" class="nav-link">课表创建</a></li>
+                <li><a href="#" data-target="course-info" class="nav-link">课程信息</a></li>
+                <li><a href="#" data-target="timetable-result" class="nav-link">课表结果</a></li>
+                <li><a href="#" data-target="timetable-overview" class="nav-link">排课总览</a></li>
+            </ul>
+            <button class="user-settings-btn">个人设置</button>
+        </div>
+    </nav>
+
+    <!-- 个人设置弹窗 -->
+    <div class="settings-modal" id="settingsModal">
+        <div class="settings-content">
+            <h3>个人设置</h3>
+            <form class="settings-form" id="settingsForm">
+                <input type="text" id="user-name" placeholder="姓名" required>
+                <input type="text" id="user-position" placeholder="职位">
+                <div class="settings-buttons">
+                    <button type="button" class="settings-cancel" id="settingsCancel">取消</button>
+                    <button type="submit" class="settings-save">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 帮助手册页面 -->
+    <div id="help-manual" class="content">
+        <h2>帮助手册</h2>
+        <div class="help-content">
+            <h3>系统介绍</h3>
+            <p>智能排课系统是一款专为学校设计的课程安排工具，可以帮助教务人员快速、合理地安排课程表。</p>
+
+            <h3>使用指南</h3>
+            <p>1. 在"课表创建"页面设置基本排课参数</p>
+            <p>2. 在"课程信息"页面添加课程和教师信息</p>
+            <p>3. 生成课表并查看结果</p>
+            <p>4. 在"排课总览"页面查看所有已创建的课表</p>
+
+            <h3>常见问题</h3>
+            <p>Q: 如何修改已创建的课表？</p>
+            <p>A: 在"排课总览"页面找到相应课表，点击编辑按钮进行修改。</p>
+        </div>
+    </div>
+
+    <!-- 课表创建页面 -->
+    <div id="timetable-creation" class="content">
+        <h2>课表创建</h2>
+        <form id="createTimetableForm">
+            <input type="text" id="timetable-name" placeholder="课表名称" required>
+
+            <select id="上课周期">
+                <option value="星期一---星期五">星期一---星期五</option>
+                <option value="星期一---星期六">星期一---星期六</option>
+                <option value="星期一---星期日">星期一---星期日</option>
+            </select>
+
+            <div class="section-select">
+                <select id="上午节次">
+                    <option value="1">1节</option>
+                    <option value="2">2节</option>
+                    <option value="3">3节</option>
+                    <option value="4">4节</option>
+                    <option value="5">5节</option>
+                </select>
+                <span>上午节次</span>
+            </div>
+
+            <div class="section-select">
+                <select id="下午节次">
+                    <option value="1">1节</option>
+                    <option value="2">2节</option>
+                    <option value="3">3节</option>
+                    <option value="4">4节</option>
+                    <option value="5">5节</option>
+                </select>
+                <span>下午节次</span>
+            </div>
+
+            <div class="section-select">
+                <select id="晚上节次">
+                    <option value="0">0节</option>
+                    <option value="1">1节</option>
+                    <option value="2">2节</option>
+                    <option value="3">3节</option>
+                    <option value="4">4节</option>
+                </select>
+                <span>晚上节次</span>
+            </div>
+
+            <div class="grade-class-selection">
+                <select id="年级选择" onchange="showClassOptions()">
+                    <option value="">请选择年级</option>
+                    <option value="小学一年级">小学一年级</option>
+                    <option value="小学二年级">小学二年级</option>
+                    <option value="小学三年级">小学三年级</option>
+                    <option value="小学四年级">小学四年级</option>
+                    <option value="小学五年级">小学五年级</option>
+                    <option value="小学六年级">小学六年级</option>
+                </select>
+
+                <div id="班级选择" style="display: none;">
+                    <p>选择班级：</p>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="class1" name="班级" value="1班">
+                            <label for="class1">1班</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="class2" name="班级" value="2班">
+                            <label for="class2">2班</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="class3" name="班级" value="3班">
+                            <label for="class3">3班</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="class4" name="班级" value="4班">
+                            <label for="class4">4班</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="class5" name="班级" value="5班">
+                            <label for="class5">5班</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="class6" name="班级" value="6班">
+                            <label for="class6">6班</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="class7" name="班级" value="7班">
+                            <label for="class7">7班</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="class8" name="班级" value="8班">
+                            <label for="class8">8班</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="class9" name="班级" value="9班">
+                            <label for="class9">9班</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button type="button" class="cancel-button" onclick="cancelCreation()">取消</button>
+                <button type="button" class="confirm-button" onclick="confirmCreation()">确定</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- 课程信息页面 -->
+    <div id="course-info" class="content">
+        <h2>课程信息</h2>
+        <div id="courses-container">
+            <!-- 课程将在这里动态添加 -->
+        </div>
+        <button type="button" class="add-course" onclick="addCourse()">添加课程</button>
+
+        <div class="button-group">
+            <button type="button" class="cancel-button" onclick="backToTimetableCreation()">返回</button>
+            <button type="button" class="confirm-button" onclick="generateTimetable()">生成课表</button>
+        </div>
+    </div>
+
+    <!-- 课表结果页面 -->
+    <div id="timetable-result" class="content">
+        <h2>课表结果</h2>
+        <div id="timetable-info"></div>
+        <div id="timetable-container"></div>
+        <button type="button" class="print-button" onclick="printTimetable()">打印课表</button>
+        <div class="button-group">
+            <button type="button" class="cancel-button" onclick="backToCourseInfo()">返回</button>
+            <button type="button" class="confirm-button" onclick="saveTimetable()">保存课表</button>
+        </div>
+    </div>
+
+    <!-- 排课总览页面 -->
+    <div id="timetable-overview" class="content">
+        <h2>排课总览</h2>
+        <div class="overview-container">
+            <div class="overview-card">
+                <h3>一年级课表</h3>
+                <p>班级: 1班, 2班, 3班</p>
+                <p>创建时间: 2023-05-15</p>
+            </div>
+            <div class="overview-card">
+                <h3>二年级课表</h3>
+                <p>班级: 1班, 2班</p>
+                <p>创建时间: 2023-05-10</p>
+            </div>
+            <div class="overview-card">
+                <h3>三年级课表</h3>
+                <p>班级: 1班, 2班, 3班, 4班</p>
+                <p>创建时间: 2023-05-05</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    // 全局变量，用于存储课表信息
+    let timetableData = {};
+    let courseData = [];
+    let userSettings = {
+        name: '',
+        position: ''
+    };
+
+    // 页面加载完成后执行
+    document.addEventListener('DOMContentLoaded', function() {
+        // 加载保存的用户设置
+        loadUserSettings();
+
+        const loginForm = document.getElementById('login-form');
+        const navbar = document.getElementById('navbar');
+        const mainContent = document.getElementById('main-content');
+        const navLinks = document.querySelectorAll('.nav-link');
+        const settingsBtn = document.querySelector('.user-settings-btn');
+        const settingsModal = document.getElementById('settingsModal');
+        const settingsForm = document.getElementById('settingsForm');
+        const settingsCancel = document.getElementById('settingsCancel');
+
+        // 登录表单提交
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            // 简单的登录验证
+            if (username && password) {
+                // 隐藏登录页面
+                document.getElementById('login-container').style.display = 'none';
+
+                // 显示主内容和导航栏
+                mainContent.style.display = 'block';
+                navbar.style.display = 'block';
+
+                // 默认显示课表创建页面
+                showPage('timetable-creation');
+            }
+        });
+
+        // 导航链接点击事件
+        navLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.getAttribute('data-target');
+                showPage(target);
+            });
+        });
+
+        // 个人设置按钮点击事件
+        settingsBtn.addEventListener('click', function() {
+            // 填充当前用户设置
+            document.getElementById('user-name').value = userSettings.name;
+            document.getElementById('user-position').value = userSettings.position;
+
+            // 显示设置弹窗
+            settingsModal.style.display = 'flex';
+        });
+
+        // 设置取消按钮点击事件
+        settingsCancel.addEventListener('click', function() {
+            settingsModal.style.display = 'none';
+        });
+
+        // 设置表单提交
+        settingsForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // 保存用户设置
+            userSettings.name = document.getElementById('user-name').value;
+            userSettings.position = document.getElementById('user-position').value;
+
+            // 保存到localStorage
+            localStorage.setItem('userSettings', JSON.stringify(userSettings));
+
+            // 隐藏弹窗
+            settingsModal.style.display = 'none';
+
+            alert('设置已保存');
+        });
+
+        // 点击弹窗外部关闭弹窗
+        settingsModal.addEventListener('click', function(e) {
+            if (e.target === settingsModal) {
+                settingsModal.style.display = 'none';
+            }
+        });
+    });
+
+    // 加载用户设置
+    function loadUserSettings() {
+        const savedSettings = localStorage.getItem('userSettings');
+        if (savedSettings) {
+            userSettings = JSON.parse(savedSettings);
+        }
+    }
+
+    // 显示指定页面
+    function showPage(pageId) {
+        // 隐藏所有内容区域
+        document.querySelectorAll('.content').forEach(content => {
+            content.classList.remove('active');
+        });
+
+        // 显示目标内容区域
+        document.getElementById(pageId).classList.add('active');
+
+        // 更新导航菜单激活状态
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('data-target') === pageId) {
+                link.classList.add('active');
+            }
+        });
+    }
+
+    // 显示班级选项
+    function showClassOptions() {
+        const gradeSelect = document.getElementById('年级选择');
+        const classSelect = document.getElementById('班级选择');
+
+        if (gradeSelect.value !== '') {
+            classSelect.style.display = 'block';
+        } else {
+            classSelect.style.display = 'none';
+        }
+    }
+
+    // 取消创建课表
+    function cancelCreation() {
+        document.getElementById('createTimetableForm').reset();
+        document.getElementById('班级选择').style.display = 'none';
+    }
+
+    // 确认创建课表
+    function confirmCreation() {
+        const checkedClasses = [];
+        const checkboxes = document.querySelectorAll('input[name="班级"]:checked');
+        checkboxes.forEach(checkbox => {
+            checkedClasses.push(checkbox.value);
+        });
+
+        const timetableName = document.getElementById('timetable-name').value;
+        const weekCycle = document.getElementById('上课周期').value;
+        const morningClasses = document.getElementById('上午节次').value;
+        const afternoonClasses = document.getElementById('下午节次').value;
+        const eveningClasses = document.getElementById('晚上节次').value;
+        const grade = document.getElementById('年级选择').value;
+
+        if (!timetableName) {
+            alert('请输入课表名称');
+            return;
+        }
+
+        if (grade && checkedClasses.length === 0) {
+            alert('请选择至少一个班级');
+            return;
+        }
+
+        timetableData = {
+            name: timetableName,
+            weekCycle: weekCycle,
+            morningClasses: parseInt(morningClasses),
+            afternoonClasses: parseInt(afternoonClasses),
+            eveningClasses: parseInt(eveningClasses),
+            grade: grade,
+            classes: checkedClasses
+        };
+
+        console.log('课表创建数据:', timetableData);
+        showPage('course-info');
+        addCourse();
+    }
+
+    // 添加课程
+    function addCourse() {
+        const coursesContainer = document.getElementById('courses-container');
+        const courseId = Date.now();
+
+        const courseHtml = `
+            <div class="course-container" id="course-${courseId}">
+                <div class="course-header">
+                    <input type="text" id="course-name-${courseId}" placeholder="课程名称" required>
+                    <button type="button" class="remove-course" onclick="removeCourse(${courseId})">删除课程</button>
+                </div>
+                <div class="teachers-container" id="teachers-${courseId}">
+                    <!-- 教师将在这里动态添加 -->
+                </div>
+                <button type="button" class="add-teacher" onclick="addTeacher(${courseId})">添加教师</button>
+            </div>
+        `;
+
+        coursesContainer.insertAdjacentHTML('beforeend', courseHtml);
+        addTeacher(courseId);
+    }
+
+    // 删除课程
+    function removeCourse(courseId) {
+        const courseElement = document.getElementById(`course-${courseId}`);
+        if (courseElement) {
+            courseElement.remove();
+        }
+    }
+
+    // 添加教师
+    function addTeacher(courseId) {
+        const teachersContainer = document.getElementById(`teachers-${courseId}`);
+        const teacherId = Date.now();
+
+        const teacherHtml = `
+            <div class="teacher-item" id="teacher-${teacherId}">
+                <input type="text" id="teacher-name-${teacherId}" placeholder="教师姓名" required>
+                <button type="button" class="remove-teacher" onclick="removeTeacher(${teacherId})">删除</button>
+            </div>
+        `;
+
+        teachersContainer.insertAdjacentHTML('beforeend', teacherHtml);
+    }
+
+    // 删除教师
+    function removeTeacher(teacherId) {
+        const teacherElement = document.getElementById(`teacher-${teacherId}`);
+        if (teacherElement) {
+            teacherElement.remove();
+        }
+    }
+
+    // 返回课表创建页面
+    function backToTimetableCreation() {
+        showPage('timetable-creation');
+    }
+
+    // 生成课表
+    function generateTimetable() {
+        courseData = [];
+        const courseContainers = document.querySelectorAll('.course-container');
+
+        courseContainers.forEach(container => {
+            const courseId = container.id.split('-')[1];
+            const courseName = document.getElementById(`course-name-${courseId}`).value;
+
+            if (!courseName) {
+                alert('请填写所有课程名称');
+                return;
+            }
+
+            const teachers = [];
+            const teacherItems = container.querySelectorAll('.teacher-item');
+
+            teacherItems.forEach(item => {
+                const teacherId = item.id.split('-')[1];
+                const teacherName = document.getElementById(`teacher-name-${teacherId}`).value;
+
+                if (teacherName) {
+                    teachers.push(teacherName);
+                }
+            });
+
+            if (teachers.length === 0) {
+                alert(`课程 "${courseName}" 至少需要一名教师`);
+                return;
+            }
+
+            courseData.push({
+                name: courseName,
+                teachers: teachers
+            });
+        });
+
+        if (courseData.length === 0) {
+            alert('请至少添加一个课程');
+            return;
+        }
+
+        console.log('课程信息:', courseData);
+        createTimetable();
+        showPage('timetable-result');
+    }
+
+    // 创建课表
+    function createTimetable() {
+        const timetableInfo = document.getElementById('timetable-info');
+        const timetableContainer = document.getElementById('timetable-container');
+
+        timetableInfo.innerHTML = `
+            <h3>${timetableData.name}</h3>
+            <p>年级：${timetableData.grade || '未指定'}</p>
+            <p>班级：${timetableData.classes.join(', ') || '未指定'}</p>
+            <p>上课周期：${timetableData.weekCycle}</p>
+        `;
+
+        let days = [];
+        if (timetableData.weekCycle === '星期一---星期五') {
+            days = ['星期一', '星期二', '星期三', '星期四', '星期五'];
+        } else if (timetableData.weekCycle === '星期一---星期六') {
+            days = ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+        } else {
+            days = ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日'];
+        }
+
+        const totalSessions = timetableData.morningClasses + timetableData.afternoonClasses + timetableData.eveningClasses;
+
+        function getRandomCourse() {
+            if (courseData.length === 0) return { name: '', teacher: '' };
+            const randomCourse = courseData[Math.floor(Math.random() * courseData.length)];
+            const randomTeacher = randomCourse.teachers[Math.floor(Math.random() * randomCourse.teachers.length)];
+            return { name: randomCourse.name, teacher: randomTeacher };
+        }
+
+        let timetableHtml = '<table class="timetable"><thead><tr><th>节次</th>';
+
+        days.forEach(day => {
+            timetableHtml += `<th>${day}</th>`;
+        });
+
+        timetableHtml += '</tr></thead><tbody>';
+
+        let sessionCounter = 1;
+
+        // 上午课程
+        for (let i = 1; i <= timetableData.morningClasses; i++) {
+            timetableHtml += `<tr><td>上午第${i}节</td>`;
+
+            for (let j = 0; j < days.length; j++) {
+                const course = getRandomCourse();
+                timetableHtml += `<td>${course.name}<br><small>${course.teacher}</small></td>`;
+            }
+
+            timetableHtml += '</tr>';
+            sessionCounter++;
+        }
+
+        // 下午课程
+        for (let i = 1; i <= timetableData.afternoonClasses; i++) {
+            timetableHtml += `<tr><td>下午第${i}节</td>`;
+
+            for (let j = 0; j < days.length; j++) {
+                const course = getRandomCourse();
+                timetableHtml += `<td>${course.name}<br><small>${course.teacher}</small></td>`;
+            }
+
+            timetableHtml += '</tr>';
+            sessionCounter++;
+        }
+
+        // 晚上课程
+        for (let i = 1; i <= timetableData.eveningClasses; i++) {
+            timetableHtml += `<tr><td>晚上第${i}节</td>`;
+
+            for (let j = 0; j < days.length; j++) {
+                const course = getRandomCourse();
+                timetableHtml += `<td>${course.name}<br><small>${course.teacher}</small></td>`;
+            }
+
+            timetableHtml += '</tr>';
+            sessionCounter++;
+        }
+
+        timetableHtml += '</tbody></table>';
+        timetableContainer.innerHTML = timetableHtml;
+    }
+
+    // 返回课程信息页面
+    function backToCourseInfo() {
+        showPage('course-info');
+    }
+
+    // 打印课表
+    function printTimetable() {
+        window.print();
+    }
+
+    // 保存课表
+    function saveTimetable() {
+        alert('课表保存成功！');
+    }
+</script>
+</body>
+</html>
